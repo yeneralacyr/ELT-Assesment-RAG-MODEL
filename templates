@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ölçme Değerlendirme Soru-Cevap Sistemi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Reset ve temel stiller */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: #fff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2rem;
+            color: #4a4a4a;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            resize: none;
+            padding: 15px;
+            font-size: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+            min-height: 120px;
+        }
+
+        textarea:focus {
+            border-color: #5a67d8;
+            outline: none;
+        }
+
+        button {
+            padding: 12px 20px;
+            background-color: #5a67d8;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            align-self: flex-end;
+        }
+
+        button:hover {
+            background-color: #434190;
+        }
+
+        #answer {
+            background: #f0f4ff;
+            padding: 20px;
+            border-left: 4px solid #5a67d8;
+            border-radius: 8px;
+            min-height: 60px;
+            white-space: pre-wrap;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        /* Loader stili */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #5a67d8;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive tasarım */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RAG Soru-Cevap Sistemi</h1>
+        <div class="input-group">
+            <textarea id="question" placeholder="Sorunuzu buraya yazın..."></textarea>
+        </div>
+        <div class="input-group" style="display: flex; align-items: center;">
+            <button id="submit">Gönder</button>
+            <div id="loader" class="loader" style="display: none;"></div>
+        </div>
+        <div id="answer"></div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#submit').click(function() {
+                var question = $('#question').val().trim();
+                var $answer = $('#answer');
+                var $loader = $('#loader');
+
+                if (question === "") {
+                    $answer.text("Lütfen bir soru girin.");
+                    return;
+                }
+
+                $answer.text("");
+                $loader.show();
+
+                $.ajax({
+                    url: '/query',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ question: question }),
+                    success: function(response) {
+                        $loader.hide();
+                        if(response.answer){
+                            $answer.text(response.answer);
+                        } else {
+                            $answer.text("Bir hata oluştu. Lütfen tekrar deneyin.");
+                        }
+                    },
+                    error: function() {
+                        $loader.hide();
+                        $answer.text("Sunucuya bağlanırken bir hata oluştu.");
+                    }
+                });
+            });
+
+            // Enter tuşuyla gönderme
+            $('#question').keypress(function(e) {
+                if (e.which == 13 && !e.shiftKey) {
+                    e.preventDefault();
+                    $('#submit').click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
