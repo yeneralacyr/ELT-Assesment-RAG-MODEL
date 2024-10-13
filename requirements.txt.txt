@@ -1,0 +1,9 @@
+Flask==2.3.2
+flask-cors==3.1.2
+langchain==0.0.208
+langchain-huggingface==0.0.10
+langchain-community==0.0.5
+langchain-ollama==0.0.4
+faiss-cpu==1.7.4
+ollama==0.0.1
+sentence-transformers==2.2.2
